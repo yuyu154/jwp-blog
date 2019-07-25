@@ -16,7 +16,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ArticleServiceTest {
@@ -61,7 +60,6 @@ public class ArticleServiceTest {
     }
 
     @Test
-    @DisplayName("")
     public void deleteByIdTest() {
         Article article = articleService.save(new Article(TITLE, COVER_URL, CONTENTS));
         articleService.deleteById(article.getId());
