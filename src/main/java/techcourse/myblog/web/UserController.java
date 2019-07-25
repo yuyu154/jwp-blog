@@ -56,7 +56,7 @@ public class UserController {
             log.debug("mypage/{} : Session={}", id, sessionDto);
             model.addAttribute("user", user);
             session.setAttribute(Constants.SESSION_USER_NAME, sessionDto);
-            return "/mypage";
+            return "/mypage/mypage";
         }
         return "redirect:/users";
     }
@@ -73,7 +73,7 @@ public class UserController {
         if (authenticate(user, sessionDto)) {
             model.addAttribute("user", user);
             log.debug("{} to /mypage-edit", user);
-            return "mypage-edit";
+            return "/mypage/mypage-edit";
         }
         return "redirect:/users";
     }
