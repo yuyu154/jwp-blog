@@ -1,92 +1,47 @@
 package techcourse.myblog.web;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
-import techcourse.myblog.domain.ArticleRepository;
 
+import java.net.URI;
+
+import static io.restassured.RestAssured.delete;
+import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ArticleControllerTests {
-    private static final String ROOT_URL = "/";
-    private static final String EDIT_URL = "/articles/1/edit";
-    private static final String WRITING_URL = "/writing";
-    private static final String ARTICLE_URL = "/articles";
-    private static final String SPECIFIC_ARTICLE_URL = "/articles/1";
+    private static final String SAMPLE_TITLE = "SAMPLE_TITLE";
+    private static final String SAMPLE_COVER_URL = "SAMPLE_COVER_URL";
+    private static final String SAMPLE_CONTENTS = "SAMPLE_CONTENTS";
 
-    private static final String ARTICLE_DELIMITER
-            = "<div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"tab-centered-1\">";
+    private String baseUrl;
+    private String setUpArticleUrl;
 
-    private static final String TITLE_NAME = "title";
-    private static final String COVER_URL_NAME = "coverUrl";
-    private static final String CONTENTS_NAME = "contents";
-
-    private static final String TITLE_VALUE = "TEST";
-    private static final String COVER_URL_VALUE = "https://img.com";
-    private static final String CONTENTS_VALUE = "TEST_CONTENTS";
-
-    @Autowired
-    private ArticleRepository articleRepository;
+    @LocalServerPort
+    int randomServerPort;
 
     @Autowired
     private WebTestClient webTestClient;
 
     @BeforeEach
     void setUp() {
-        articleRepository.deleteAll();
-    }
+        baseUrl = "http://localhost:" + randomServerPort;
 
-    @Test
-    @DisplayName("새로운글을_쓸때_테스트")
-    public void showWritingPage() {
-        webTestClient.get()
-                .uri(WRITING_URL)
-                .exchange()
-                .expectStatus()
-                .isOk();
-    }
-
-    @Test
-    @DisplayName("Article을_추가할때_redirect하는지_테스트")
-    public void addArticleTest() {
-        webTestClient.post()
-                .uri(ARTICLE_URL)
-                .body(BodyInserters
-                        .fromFormData(TITLE_NAME, TITLE_VALUE)
-                        .with(COVER_URL_NAME, COVER_URL_VALUE)
-                        .with(CONTENTS_NAME, CONTENTS_VALUE))
-                .exchange()
-                .expectStatus()
-                .isFound();
-    }
-
-    @Test
-    @DisplayName("Article의_목록을_조회하는지_테스트")
-    public void indexTest() {
-        final int count = 3;
-        addArticleTest();
-        addArticleTest();
-        addArticleTest();
-
-        webTestClient.get()
-                .uri(ROOT_URL)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .consumeWith(response -> {
-                    String body = new String(response.getResponseBody());
-                    assertEquals(count, StringUtils.countOccurrencesOf(body, ARTICLE_DELIMITER));
-                });
+        setUpArticleUrl = given()
+                .param("title", SAMPLE_TITLE)
+                .param("coverUrl", SAMPLE_COVER_URL)
+                .param("contents", SAMPLE_CONTENTS)
+                .cookie("JSESSIONID", LogInControllerTest.logInAsBaseUser(webTestClient))
+                .post(baseUrl + "/articles")
+                .getHeader("Location");
     }
 
     @Test
@@ -102,12 +57,16 @@ public class ArticleControllerTests {
     }
 
     @Test
-    @DisplayName("ArticleId에_맞는_Article을_변경하는지_테스트")
-    public void updateArticleById() {
-        addArticleTest();
+    void showArticles() {
+        webTestClient.get().uri("/articles")
+                .exchange()
+                .expectStatus().isOk();
+    }
 
-        webTestClient.get()
-                .uri(EDIT_URL)
+    @Test
+    void showCreatePageWhenUserLogIn() {
+        webTestClient.get().uri("/articles/new")
+                .cookie("JSESSIONID", LogInControllerTest.logInAsBaseUser(webTestClient))
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -120,14 +79,122 @@ public class ArticleControllerTests {
     }
 
     @Test
-    @DisplayName("Article을_삭제할때_redirect하는지_테스트")
-    public void deleteArticle() {
-        addArticleTest();
-
-        webTestClient.delete()
-                .uri(SPECIFIC_ARTICLE_URL)
+    void showCreatePageWhenUserLogOut() {
+        webTestClient.get().uri("/articles/new")
                 .exchange()
-                .expectStatus()
-                .isFound();
+                .expectStatus().isFound();
+    }
+
+    @Test
+    void createArticle() {
+        String newTitle = "New Title";
+        String newCoverUrl = "New Cover Url";
+        String newContents = "New Contents";
+
+        webTestClient.post()
+                .uri("/articles")
+                .cookie("JSESSIONID", LogInControllerTest.logInAsBaseUser(webTestClient))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters
+                        .fromFormData("title", newTitle)
+                        .with("coverUrl", newCoverUrl)
+                        .with("contents", newContents))
+                .exchange()
+                .expectStatus().isFound()
+                .expectBody()
+                .consumeWith(response -> {
+                    URI location = response.getResponseHeaders().getLocation();
+                    webTestClient.get()
+                            .uri(location)
+                            .exchange()
+                            .expectBody()
+                            .consumeWith(res -> {
+                                String body = new String(res.getResponseBody());
+                                assertThat(body.contains(newTitle)).isTrue();
+                                assertThat(body.contains(newCoverUrl)).isTrue();
+                                assertThat(body.contains(newContents)).isTrue();
+                            });
+                });
+    }
+
+    @Test
+    void showArticle() {
+        webTestClient.get()
+                .uri(setUpArticleUrl)
+                .exchange()
+                .expectBody()
+                .consumeWith(res -> {
+                    String body = new String(res.getResponseBody());
+                    assertThat(body.contains(SAMPLE_TITLE)).isTrue();
+                    assertThat(body.contains(SAMPLE_COVER_URL)).isTrue();
+                    assertThat(body.contains(SAMPLE_CONTENTS)).isTrue();
+                });
+    }
+
+    @Test
+    void showEditPage() {
+        webTestClient.get()
+                .uri(setUpArticleUrl + "/edit")
+                .cookie("JSESSIONID", LogInControllerTest.logInAsBaseUser(webTestClient))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .consumeWith(response -> {
+                    String body = new String(response.getResponseBody());
+                    assertThat(body.contains(SAMPLE_TITLE)).isTrue();
+                    assertThat(body.contains(SAMPLE_COVER_URL)).isTrue();
+                    assertThat(body.contains(SAMPLE_CONTENTS)).isTrue();
+                });
+    }
+
+    @Test
+    void editArticle() {
+        String newTitle = "test";
+        String newCoverUrl = "newCorverUrl";
+        String newContents = "newContents";
+
+        webTestClient.put()
+                .uri(setUpArticleUrl)
+                .cookie("JSESSIONID", LogInControllerTest.logInAsBaseUser(webTestClient))
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters
+                        .fromFormData("title", newTitle)
+                        .with("coverUrl", newCoverUrl)
+                        .with("contents", newContents))
+                .exchange()
+                .expectStatus().is3xxRedirection()
+                .expectBody()
+                .consumeWith(response -> {
+                    URI location = response.getResponseHeaders().getLocation();
+                    webTestClient.get()
+                            .uri(location)
+                            .exchange()
+                            .expectBody()
+                            .consumeWith(res -> {
+                                String body = new String(res.getResponseBody());
+                                assertThat(body.contains(newTitle)).isTrue();
+                                assertThat(body.contains(newCoverUrl)).isTrue();
+                                assertThat(body.contains(newContents)).isTrue();
+                            });
+                });
+    }
+
+    @Test
+    void deleteArticle() {
+        webTestClient.delete()
+                .uri(setUpArticleUrl)
+                .cookie("JSESSIONID", LogInControllerTest.logInAsBaseUser(webTestClient))
+                .exchange()
+                .expectStatus().isFound();
+
+        webTestClient.get()
+                .uri(setUpArticleUrl)
+                .exchange()
+                .expectStatus().isFound();
+    }
+
+    @AfterEach
+    void tearDown() {
+        delete(setUpArticleUrl);
     }
 }
