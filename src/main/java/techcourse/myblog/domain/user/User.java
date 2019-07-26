@@ -1,11 +1,13 @@
-package techcourse.myblog.domain.User;
+package techcourse.myblog.domain.user;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import techcourse.myblog.domain.article.Article;
 import techcourse.myblog.exception.UserCreationException;
 
 import javax.persistence.*;
-import java.util.Objects;
+import javax.validation.constraints.Email;
+import java.util.*;
 import java.util.regex.Pattern;
 
 @Entity
@@ -28,15 +30,21 @@ public class User {
     private String name;
 
     @Column(unique = true, nullable = false)
+    @Email
     private String email;
 
     @Column(nullable = false)
     private String password;
 
+    @OneToMany(mappedBy = "author", fetch = FetchType.EAGER)
+    private List<Article> articles;
+
     public User() {
+        this.articles = new ArrayList<>();
     }
 
     public User(final String name, final String email, final String password) {
+        this();
         validate(name, password);
         this.name = name;
         this.email = email;
@@ -63,7 +71,7 @@ public class User {
     }
 
     private void validateName(final String name) {
-        log.debug("name in User.class : {}", name);
+        log.debug("name in user.class : {}", name);
         if (name.length() < NAME_MIN_LENGTH || name.length() > NAME_MAX_LENGTH) {
             throw new UserCreationException("이름의 길이는 " + NAME_MIN_LENGTH +
                     "이상 " + NAME_MAX_LENGTH + "이하로 작성하세요");
@@ -75,7 +83,7 @@ public class User {
     }
 
     private void validatePassword(final String password) {
-        log.debug("password in User.class : {}", password);
+        log.debug("password in user.class : {}", password);
         if (password.length() < PASSWORD_MIN_LENGTH) {
             throw new UserCreationException("비밀번호의 길이는 " + PASSWORD_MIN_LENGTH +
                     "이상으로 작성해주세요");
@@ -107,6 +115,14 @@ public class User {
         return password;
     }
 
+    public boolean addArticle(final Article article) {
+        return articles.add(article);
+    }
+
+    public Collection<Article> getArticles() {
+        return Collections.unmodifiableList(articles);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -124,7 +140,7 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
+        return "user{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +

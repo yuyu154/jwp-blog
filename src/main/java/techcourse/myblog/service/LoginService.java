@@ -2,8 +2,8 @@ package techcourse.myblog.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import techcourse.myblog.domain.User.User;
-import techcourse.myblog.domain.User.UserRepository;
+import techcourse.myblog.domain.user.User;
+import techcourse.myblog.domain.user.UserRepository;
 import techcourse.myblog.exception.NoSuchUserException;
 import techcourse.myblog.exception.PasswordMismatchException;
 import techcourse.myblog.web.dto.UserRequestDto;

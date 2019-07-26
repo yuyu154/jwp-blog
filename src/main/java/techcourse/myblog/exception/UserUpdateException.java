@@ -6,7 +6,7 @@ public class UserUpdateException extends IllegalArgumentException {
     private String url;
 
     public UserUpdateException() {
-        super("User 클래스 변경 중 예외 발생");
+        super("user 클래스 변경 중 예외 발생");
     }
 
     public UserUpdateException(final String message) {

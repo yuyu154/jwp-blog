@@ -1,5 +1,7 @@
 package techcourse.myblog.domain.article;
 
+import techcourse.myblog.domain.user.User;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -15,8 +17,12 @@ public class Article {
     @Column(nullable = false)
     private String coverUrl;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1000)
     private String contents;
+
+    @ManyToOne
+    @JoinColumn(name = "author", foreignKey = @ForeignKey(name = "fk_article_to_user"))
+    private User author;
 
     public Article() {
 
@@ -74,6 +80,10 @@ public class Article {
 
     public void setContents(String contents) {
         this.contents = contents;
+    }
+
+    public void setAuthor(User user) {
+        this.author = user;
     }
 
     @Override

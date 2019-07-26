@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import techcourse.myblog.domain.User.User;
+import techcourse.myblog.domain.user.User;
 import techcourse.myblog.web.dto.UserRequestDto;
 
 import java.util.NoSuchElementException;

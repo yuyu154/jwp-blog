@@ -12,7 +12,7 @@ import org.springframework.test.web.reactive.server.EntityExchangeResult;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
-import techcourse.myblog.domain.User.User;
+import techcourse.myblog.domain.user.User;
 import techcourse.myblog.service.LoginService;
 import techcourse.myblog.service.UserService;
 import techcourse.myblog.web.dto.UserRequestDto;

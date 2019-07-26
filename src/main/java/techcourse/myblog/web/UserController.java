@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import techcourse.myblog.domain.User.User;
+import techcourse.myblog.domain.user.User;
 import techcourse.myblog.service.UserService;
 import techcourse.myblog.web.dto.UserRequestDto;
 
@@ -52,7 +52,7 @@ public class UserController {
 
         if (authenticate(user, sessionDto)) {
             log.debug("authenticate...");
-            log.debug("mypage/{} : User={}", id, user);
+            log.debug("mypage/{} : user={}", id, user);
             log.debug("mypage/{} : Session={}", id, sessionDto);
             model.addAttribute("user", user);
             session.setAttribute(Constants.SESSION_USER_NAME, sessionDto);
