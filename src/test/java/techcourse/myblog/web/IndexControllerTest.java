@@ -3,10 +3,8 @@ package techcourse.myblog.web;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -15,8 +13,8 @@ import techcourse.myblog.domain.ArticleRepository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+<<<<<<< HEAD:src/test/java/techcourse/myblog/web/ArticleControllerTests.java
 public class ArticleControllerTests {
     private static final String ROOT_URL = "/";
     private static final String EDIT_URL = "/articles/1/edit";
@@ -38,8 +36,11 @@ public class ArticleControllerTests {
     @Autowired
     private ArticleRepository articleRepository;
 
+=======
+class IndexControllerTest {
+>>>>>>> yk1028:src/test/java/techcourse/myblog/web/IndexControllerTest.java
     @Autowired
-    private WebTestClient webTestClient;
+    WebTestClient webTestClient;
 
     @BeforeEach
     void setUp() {
@@ -100,6 +101,7 @@ public class ArticleControllerTests {
                 .expectStatus()
                 .isOk();
     }
+<<<<<<< HEAD:src/test/java/techcourse/myblog/web/ArticleControllerTests.java
 
     @Test
     @DisplayName("ArticleId에_맞는_Article을_변경하는지_테스트")
@@ -131,3 +133,6 @@ public class ArticleControllerTests {
                 .isFound();
     }
 }
+=======
+}
+>>>>>>> yk1028:src/test/java/techcourse/myblog/web/IndexControllerTest.java

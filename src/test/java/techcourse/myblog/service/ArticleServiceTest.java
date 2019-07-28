@@ -1,5 +1,6 @@
 package techcourse.myblog.service;
 
+<<<<<<< HEAD
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -82,3 +83,46 @@ public class ArticleServiceTest {
     }
 
 }
+=======
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import techcourse.myblog.service.dto.ArticleDto;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+public class ArticleServiceTest {
+    @Autowired
+    ArticleService articleService;
+
+    @BeforeEach
+    void setUp() {
+        articleService.save(new ArticleDto(1L, 1L, "title", "coverUrl", "contents"));
+    }
+
+    @Test
+    void Article_userId와_수정하려는_User의_Id가_다르면_수정_실패() {
+        ArticleDto articleDto = new ArticleDto(1L, 1L, "title1", "coverUrl1", "contents1");
+
+        articleService.update(1L, 2L, articleDto);
+        ArticleDto updateFailArticle = articleService.findById(1L);
+
+        assertThat(updateFailArticle.getTitle()).isEqualTo("title");
+        assertThat(updateFailArticle.getCoverUrl()).isEqualTo("coverUrl");
+        assertThat(updateFailArticle.getContents()).isEqualTo("contents");
+
+    }
+
+    @Test
+    void Article_userId와_삭제하려는_User의_Id가_다르면_삭제_실패() {
+        articleService.delete(1L, 2L);
+        ArticleDto deleteFailArticle = articleService.findById(1L);
+
+        assertThat(deleteFailArticle.getTitle()).isEqualTo("title");
+        assertThat(deleteFailArticle.getCoverUrl()).isEqualTo("coverUrl");
+        assertThat(deleteFailArticle.getContents()).isEqualTo("contents");
+    }
+}
+>>>>>>> yk1028
